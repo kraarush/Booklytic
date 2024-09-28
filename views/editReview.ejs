@@ -1,0 +1,30 @@
+<%- include('partials/header.ejs'); -%>
+
+<div class="container w-75 mt-5">
+
+  <div class="text-center">
+    <h3 class="mb-4">Update any of the following details :--</h3>
+  </div>
+    <% if(locals.bookData) { %>
+        <form class="container w-75 col" action="/editReview/<%=bookData.id%>" method="post">
+            <div class="mb-3 row">
+              <input type="text" class="form-control" name="title" value="<%= bookData.title %>"/>
+            </div>
+            <div class="mb-3 row">
+              <input type="text" class="form-control" name="author" value="<%= bookData.author %>"/>
+            </div>
+            <div class="mb-3 row">
+              <input type="number" class="form-control" name="rating"  min="0" max="5" value="<%= bookData.rating %>"/>
+            </div>
+        
+            <div class="mb-3 row">
+              <textarea id="review" name="content" class="form-control" rows="5" ><%= bookData.content %></textarea>
+            </div>
+        
+            <button type="submit" class="btn btn-primary row">Submit</button>
+          </form>
+    <% } %>
+        
+</div>
+
+<%- include('partials/footer.ejs'); -%>
