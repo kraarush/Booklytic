@@ -1,0 +1,58 @@
+<%- include('partials/header.ejs'); -%>
+
+<div class="container w-75 mt-5">
+  <div class="text-center mt-4" id="errorDiv">
+    <h3 class="text-danger">
+      <% if(locals.message){ %> <%= message %> <% } %>
+    </h3>
+  </div>
+
+  <div class="text-center">
+    <h3 class="mb-4">Add the following details :--</h3>
+  </div>
+  <form class="container w-75 col" action="/addReview" method="post">
+    <div class="mb-3 row">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        name="title"
+        placeholder="Enter book title"
+      />
+    </div>
+    <div class="mb-3 row">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        name="author"
+        placeholder="Enter author's name"
+      />
+    </div>
+    <div class="mb-3 row">
+      <input
+        type="number"
+        class="form-control"
+        id="exampleInputEmail1"
+        name="rating"
+        placeholder="Give rating"
+        min="0"
+        max="5"
+      />
+    </div>
+
+    <div class="mb-3 row">
+      <textarea
+        id="review"
+        name="content"
+        class="form-control"
+        rows="5"
+        placeholder="Write your review here..."
+      ></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary row">Submit</button>
+  </form>
+</div>
+
+<%- include('partials/footer.ejs'); -%>
