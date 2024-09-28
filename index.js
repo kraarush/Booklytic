@@ -58,12 +58,12 @@ async function insertIfEmpty(apiData){
   }
 }
 
-// app.get('/addmorebooks', async(req,res) => {
-//   const apiData = await fetchRandomBooks();
-//   let data = await insertIfEmpty(apiData);
-//   console.log("successful");
-//   res.send("done inserting data");
-// });
+app.get('/addmorebooks', async(req,res) => {
+  const apiData = await fetchRandomBooks();
+  let data = await insertIfEmpty(apiData);
+  console.log("successful");
+  res.send("done inserting data");
+});
 
 app.get('/', async (req, res) => {
   try {
