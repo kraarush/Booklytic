@@ -3,13 +3,6 @@ import pg from 'pg';
 import axios from 'axios';
 import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
-<<<<<<< HEAD
-
-const app = express();
-const port = 4000;
-const api_url = "https://openlibrary.org/dev/docs/api/covers";
-const api_key = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
-=======
 import bcrypt from 'bcrypt';
 
 
@@ -17,8 +10,7 @@ const app = express();
 const port = 4000;
 const saltRounds = 10;
 let isLoggedIn = false;
-// let emailToUpdatePassword = '';
->>>>>>> origin/main
+let emailToUpdatePassword = '';
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -76,9 +68,6 @@ async function insertIfEmpty(apiData){
 //   res.send("done inserting data");
 // });
 
-<<<<<<< HEAD
-app.get('/', async (req, res) => {
-=======
 app.get("/", (req, res) => {
   res.render("home.ejs");
 });
@@ -177,7 +166,6 @@ app.post("/login", async (req, res) => {
 });
 
 app.get('/dashboard', async (req, res) => {
->>>>>>> origin/main
   try {
     let data = await getData();
 
@@ -185,11 +173,7 @@ app.get('/dashboard', async (req, res) => {
       let apiData = await fetchRandomBooks();
       data = await insertIfEmpty(apiData);
     }
-<<<<<<< HEAD
-    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false});
-=======
     res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false, isLoggedIn: isLoggedIn});
->>>>>>> origin/main
   }
   catch (err) {
     console.log(err);
@@ -197,9 +181,6 @@ app.get('/dashboard', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-=======
-let emailToUpdatePassword = '';
 
 app.post('/reset-password',async (req,res) => {
   const { email } = req.body;
@@ -228,7 +209,6 @@ app.post('/set-new-password', async(req,res) => {
   })
 });
 
->>>>>>> origin/main
 app.get('/add', (req, res) => {
   try {
     res.status(200).render('addReview.ejs');
