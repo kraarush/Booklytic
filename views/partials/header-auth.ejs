@@ -16,19 +16,9 @@
   <body class="bg-light">
     <main >
       
-      <nav class="navbar navbar-expand-lg bg-dark mb-3">
+      <nav class="navbar navbar-expand-lg bg-dark mb-4">
         <div class="container-fluid d-flex align-items-center">
           <img src="/Images/logo.webp" alt="Logo" style="height: 70px;" />
           <a class="navbar-brand text-white fs-2 ms-3 me-auto" href="/">Booklytic</a>
         </div>
-        
-        <a class="navbar-brand text-white" href="/add">Add Review</a>
-        
       </nav>
-
-      <% if(locals.isEmpty){ %>
-          <div class="container text-center mb-4 text-primary">
-            <h2>Sorry dont have any book reviews yet</h2>
-          </div>
-      <% } %>
-      

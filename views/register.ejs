@@ -22,6 +22,12 @@
                 Please provide a password.
               </div>
             </div>
+
+            <h5 class="mb-3 text-danger text-center">
+              <% if(locals.ifExist){ %>
+                User already exists with that email
+                <% } %>
+            </h5>
             <button type="submit" class="btn btn-dark w-100 mb-3">Register</button>
           </form>
 
@@ -36,55 +42,19 @@
 </div>
 
 <script>
-// Bootstrap form validation
-(function () {
-  'use strict';
-  var forms = document.querySelectorAll('form');
-
-  Array.prototype.slice.call(forms).forEach(function (form) {
+  (function () {
+    'use strict';
+    var form = document.querySelector('form'); 
+  
     form.addEventListener('submit', function (event) {
       if (!form.checkValidity()) {
-        event.preventDefault();
+        event.preventDefault(); 
         event.stopPropagation();
       }
-      form.classList.add('was-validated');
+      form.classList.add('was-validated'); 
     }, false);
-  });
-})();
-</script>
-
-
-<script>
-// Bootstrap form validation
-(function () {
-  'use strict';
-  var forms = document.querySelectorAll('form');
-
-  Array.prototype.slice.call(forms).forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-      if (!form.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      form.classList.add('was-validated');
-    }, false);
-  });
-})();
-</script>
-
-
-    <!-- <div class="col-sm-4">
-      <div class="card social-block">
-        <div class="card-body">
-          <a class="btn btn-block" href="/auth/google" role="button">
-            <i class="fab fa-google"></i>
-            Sign Up with Google
-          </a>
-        </div>
-      </div>
-    </div> -->
-
-  </div>
-</div>
+  })();
+  </script>
+  
 
 <%- include('partials/footer') %>

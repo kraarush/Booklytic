@@ -9,7 +9,8 @@ import bcrypt from 'bcrypt';
 const app = express();
 const port = 4000;
 const saltRounds = 10;
-
+let isLoggedIn = false;
+// let emailToUpdatePassword = '';
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -79,6 +80,21 @@ app.get("/register", (req, res) => {
   res.render("register.ejs");
 });
 
+app.get('/signOut', (req,res) => {
+  try{
+    isLoggedIn = false;
+    res.redirect('/login');
+  }
+  catch(err){
+    console.log("Error in signOut" + err);
+    res.send("Error signing out " + err);
+  }
+});
+
+app.get('/forgotPassword',(req,res) => {
+  res.render('forgotPassword.ejs');
+});
+
 app.post("/register", async (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
@@ -89,7 +105,7 @@ app.post("/register", async (req, res) => {
     ]);
 
     if (checkResult.rows.length > 0) {
-      res.send("Email already exists. Try logging in.");
+      res.status(400).render('register.ejs', { ifExist: true });
     }
     else {
       bcrypt.hash(password, saltRounds, async (err, hash) => {
@@ -132,10 +148,11 @@ app.post("/login", async (req, res) => {
         }
         else {
           if (result) {
+            isLoggedIn  =  true;
             res.redirect('/dashboard');
           }
           else{
-            res.send("Incorrect password");
+            res.status(404).render('login.ejs',{isPasswordCorrect: false});
           }
         }
       });
@@ -148,7 +165,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 app.get('/dashboard', async (req, res) => {
   try {
     let data = await getData();
@@ -157,12 +173,41 @@ app.get('/dashboard', async (req, res) => {
       let apiData = await fetchRandomBooks();
       data = await insertIfEmpty(apiData);
     }
-    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false});
+    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false, isLoggedIn: isLoggedIn});
   }
   catch (err) {
     console.log(err);
     res.status(500).send("Internal Server error fetching the index.ejs file");
   }
+});
+
+let emailToUpdatePassword = '';
+
+app.post('/reset-password',async (req,res) => {
+  const { email } = req.body;
+  const result = await db.query("select * from users where email = $1",[email]);
+
+  if(result.rows.length === 0){
+    res.render('forgotPassword.ejs', {isExist: false, updatedPassword: false});
+  }
+  else{
+    emailToUpdatePassword = email;
+    res.render('forgotPassword.ejs', {isExist: true, updatedPassword: false});
+  }
+});
+
+app.post('/set-new-password', async(req,res) => {
+  const newPassword = req.body.newPassword;
+  bcrypt.hash(newPassword,saltRounds, async (err,hash) => {
+    if(err){
+      console.log(err);
+      res.send("Error hashing the new Password");
+    }
+    else{
+      const result = await db.query("update users set password = $1 where email = $2",[hash,emailToUpdatePassword]);
+      res.render('updatedNewPassword.ejs');
+    }
+  })
 });
 
 app.get('/add', (req, res) => {

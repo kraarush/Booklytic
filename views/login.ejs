@@ -23,13 +23,18 @@
                 Please enter your password.
               </div>
             </div>
+
+              <% if(locals.isPasswordCorrect === false) {%>
+                <p class="text-danger text-center">Enter correct Password</p>
+              <% } %>
+              
             <button type="submit" class="btn btn-dark w-100 mb-3">Login</button>
           </form>
 
           <!-- Forgot Password link -->
           <div class="d-flex justify-content-between">
             <p>Don't have an account?  <a href="/register" class="link-primary text-decoration-none">Sign-Up</a></p>
-            <a href="/forgot-password" class="link-primary text-decoration-none">Forgot Password ?</a>
+            <a href="/forgotPassword" class="link-primary text-decoration-none">Forgot Password ?</a>
           </div>
 
         </div>
