@@ -1,14 +1,6 @@
 import axios from "axios";
 
 const fetchRandomBooks = async () => {
-<<<<<<< HEAD
-    const API_KEY = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
-    const query = 'fiction';
-    const maxResults = 40;  
-    const startIndex = Math.floor(Math.random() * 100); 
-
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}&key=${API_KEY}`;
-=======
     const api_url = "https://www.googleapis.com/books/v1/volumes";
     const API_KEY = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
     const query = 'fiction';
@@ -16,7 +8,6 @@ const fetchRandomBooks = async () => {
     const startIndex = Math.floor(Math.random() * 100); 
 
     const url = `${api_url}?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}&key=${API_KEY}`;
->>>>>>> origin/main
 
     try {
         const response = await fetch(url);

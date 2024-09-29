@@ -10,38 +10,34 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
-    <link rel="shortcut icon" href="/Images/logo.webp" type="image/x-icon">
+    <link rel="shortcut icon" href="/Images/logo.webp" type="image/x-icon" />
   </head>
 
   <body class="bg-body-secondary">
-    <main >
-      
+    <main>
       <nav class="navbar navbar-expand-lg bg-dark mb-3">
         <div class="container-fluid d-flex align-items-center">
-          <img src="/Images/logo.webp" alt="Logo" style="height: 70px;" />
-<<<<<<< HEAD
-          <a class="navbar-brand text-white fs-2 ms-3 me-auto" href="/">Booklytic</a>
+          <img src="/Images/logo.webp" alt="Logo" style="height: 70px" />
+          <a
+            class="navbar-brand text-warning fs-2 ms-3 me-auto"
+            href="/dashboard"
+            >Booklytic</a
+          >
         </div>
-        
-        <a class="navbar-brand text-white" href="/add">Add Review</a>
-=======
-          <a class="navbar-brand text-white fs-2 ms-3 me-auto" href="/dashboard">Booklytic</a>
-        </div>
-        
-        <a class="navbar-brand text-white" href="/add">Add Review</a>
 
-        <div>
-          <% if(locals.isLoggedIn == true) {%>
-            <a class="navbar-brand text-white" href="/signOut">Sign Out</a>
-            <% } %>
-        </div>
->>>>>>> origin/main
-        
+        <a class="navbar-brand text-warning" href="/add">Add Review</a>
+
+        <% if(locals.isLoggedIn == true) {%>
+        <a class="navbar-brand text-warning " href="/signOut">Sign Out</a>
+        <% } %>
+
       </nav>
 
       <% if(locals.isEmpty){ %>
-          <div class="container text-center mb-4 text-primary">
-            <h2>Sorry dont have any book reviews yet</h2>
-          </div>
+      <div class="container text-center mb-4 text-primary">
+        <h2>Sorry dont have any book reviews yet</h2>
+      </div>
       <% } %>
-      
+    </main>
+  </body>
+</html>
