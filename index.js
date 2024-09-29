@@ -3,11 +3,13 @@ import pg from 'pg';
 import axios from 'axios';
 import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
+import bcrypt from 'bcrypt';
+
 
 const app = express();
 const port = 4000;
-const api_url = "https://openlibrary.org/dev/docs/api/covers";
-const api_key = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
+const saltRounds = 10;
+
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -58,14 +60,96 @@ async function insertIfEmpty(apiData){
   }
 }
 
-app.get('/addmorebooks', async(req,res) => {
-  const apiData = await fetchRandomBooks();
-  let data = await insertIfEmpty(apiData);
-  console.log("successful");
-  res.send("done inserting data");
+// app.get('/addmorebooks', async(req,res) => {
+//   const apiData = await fetchRandomBooks();
+//   let data = await insertIfEmpty(apiData);
+//   console.log("successful");
+//   res.send("done inserting data");
+// });
+
+app.get("/", (req, res) => {
+  res.render("home.ejs");
 });
 
-app.get('/', async (req, res) => {
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register.ejs");
+});
+
+app.post("/register", async (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (checkResult.rows.length > 0) {
+      res.send("Email already exists. Try logging in.");
+    }
+    else {
+      bcrypt.hash(password, saltRounds, async (err, hash) => {
+        if (err) {
+          console.log(err);
+          res.send('Error hashing the password' + err);
+        }
+        else {
+          const result = await db.query(
+            "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
+            [email, hash]);
+            console.log(result.rows); 
+          res.redirect('/login');
+        }
+      });
+    }
+  }
+  catch (err) {
+    console.log(err);
+  }
+
+});
+
+app.post("/login", async (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const result = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+      const storedHashedPassword = user.password;
+
+      bcrypt.compare(password, storedHashedPassword, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send('Error comparing the password' + err);
+        }
+        else {
+          if (result) {
+            res.redirect('/dashboard');
+          }
+          else{
+            res.send("Incorrect password");
+          }
+        }
+      });
+
+    } else {
+      res.send("User not found");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+
+app.get('/dashboard', async (req, res) => {
   try {
     let data = await getData();
 

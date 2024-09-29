@@ -1,12 +1,13 @@
 import axios from "axios";
 
 const fetchRandomBooks = async () => {
+    const api_url = "https://www.googleapis.com/books/v1/volumes";
     const API_KEY = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
     const query = 'fiction';
-    const maxResults = 40;  
+    const maxResults = 30;
     const startIndex = Math.floor(Math.random() * 100); 
 
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}&key=${API_KEY}`;
+    const url = `${api_url}?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}&key=${API_KEY}`;
 
     try {
         const response = await fetch(url);
