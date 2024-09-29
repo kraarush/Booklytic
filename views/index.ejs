@@ -1,10 +1,10 @@
 <%- include('partials/header.ejs'); -%>
 
-<div class="container ">
+<div class="container">
   <% if (locals.bookData) { %>
     <% for (let book of bookData) { %>
       <div class="container bg-body-tertiary col w-75 mb-4 p-4 shadow-lg">
-        <h1 class="row text-dark mb-4"> <%= book.title %></h1>
+        <h1 class="row text-primary mb-4"> <%= book.title %></h1>
         
         <div class="d-flex mb-4">
           <img src="<%= book.image %>" class="img-fluid me-5" style="max-width: 150px; max-height: 250px;" alt="<%= book.title %>" />

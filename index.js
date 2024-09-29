@@ -5,9 +5,8 @@ import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
 import bcrypt from 'bcrypt';
 
-
 const app = express();
-const port = 4000;
+const port = 3000;
 const saltRounds = 10;
 let isLoggedIn = false;
 let emailToUpdatePassword = '';

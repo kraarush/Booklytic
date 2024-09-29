@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const fetchRandomBooks = async () => {
-
     const api_url = "https://www.googleapis.com/books/v1/volumes";
     const API_KEY = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
     const query = 'fiction';
