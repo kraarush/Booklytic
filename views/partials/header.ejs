@@ -19,10 +19,23 @@
       <nav class="navbar navbar-expand-lg bg-dark mb-3">
         <div class="container-fluid d-flex align-items-center">
           <img src="/Images/logo.webp" alt="Logo" style="height: 70px;" />
+<<<<<<< HEAD
           <a class="navbar-brand text-white fs-2 ms-3 me-auto" href="/">Booklytic</a>
         </div>
         
         <a class="navbar-brand text-white" href="/add">Add Review</a>
+=======
+          <a class="navbar-brand text-white fs-2 ms-3 me-auto" href="/dashboard">Booklytic</a>
+        </div>
+        
+        <a class="navbar-brand text-white" href="/add">Add Review</a>
+
+        <div>
+          <% if(locals.isLoggedIn == true) {%>
+            <a class="navbar-brand text-white" href="/signOut">Sign Out</a>
+            <% } %>
+        </div>
+>>>>>>> origin/main
         
       </nav>
 

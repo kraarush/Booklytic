@@ -3,11 +3,22 @@ import pg from 'pg';
 import axios from 'axios';
 import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
+<<<<<<< HEAD
 
 const app = express();
 const port = 4000;
 const api_url = "https://openlibrary.org/dev/docs/api/covers";
 const api_key = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
+=======
+import bcrypt from 'bcrypt';
+
+
+const app = express();
+const port = 4000;
+const saltRounds = 10;
+let isLoggedIn = false;
+// let emailToUpdatePassword = '';
+>>>>>>> origin/main
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -65,7 +76,108 @@ async function insertIfEmpty(apiData){
 //   res.send("done inserting data");
 // });
 
+<<<<<<< HEAD
 app.get('/', async (req, res) => {
+=======
+app.get("/", (req, res) => {
+  res.render("home.ejs");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register.ejs");
+});
+
+app.get('/signOut', (req,res) => {
+  try{
+    isLoggedIn = false;
+    res.redirect('/login');
+  }
+  catch(err){
+    console.log("Error in signOut" + err);
+    res.send("Error signing out " + err);
+  }
+});
+
+app.get('/forgotPassword',(req,res) => {
+  res.render('forgotPassword.ejs');
+});
+
+app.post("/register", async (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (checkResult.rows.length > 0) {
+      res.status(400).render('register.ejs', { ifExist: true });
+    }
+    else {
+      bcrypt.hash(password, saltRounds, async (err, hash) => {
+        if (err) {
+          console.log(err);
+          res.send('Error hashing the password' + err);
+        }
+        else {
+          const result = await db.query(
+            "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
+            [email, hash]);
+            console.log(result.rows); 
+          res.redirect('/login');
+        }
+      });
+    }
+  }
+  catch (err) {
+    console.log(err);
+  }
+
+});
+
+app.post("/login", async (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const result = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+      const storedHashedPassword = user.password;
+
+      bcrypt.compare(password, storedHashedPassword, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send('Error comparing the password' + err);
+        }
+        else {
+          if (result) {
+            isLoggedIn  =  true;
+            res.redirect('/dashboard');
+          }
+          else{
+            res.status(404).render('login.ejs',{isPasswordCorrect: false});
+          }
+        }
+      });
+
+    } else {
+      res.send("User not found");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.get('/dashboard', async (req, res) => {
+>>>>>>> origin/main
   try {
     let data = await getData();
 
@@ -73,7 +185,11 @@ app.get('/', async (req, res) => {
       let apiData = await fetchRandomBooks();
       data = await insertIfEmpty(apiData);
     }
+<<<<<<< HEAD
     res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false});
+=======
+    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false, isLoggedIn: isLoggedIn});
+>>>>>>> origin/main
   }
   catch (err) {
     console.log(err);
@@ -81,6 +197,38 @@ app.get('/', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+let emailToUpdatePassword = '';
+
+app.post('/reset-password',async (req,res) => {
+  const { email } = req.body;
+  const result = await db.query("select * from users where email = $1",[email]);
+
+  if(result.rows.length === 0){
+    res.render('forgotPassword.ejs', {isExist: false, updatedPassword: false});
+  }
+  else{
+    emailToUpdatePassword = email;
+    res.render('forgotPassword.ejs', {isExist: true, updatedPassword: false});
+  }
+});
+
+app.post('/set-new-password', async(req,res) => {
+  const newPassword = req.body.newPassword;
+  bcrypt.hash(newPassword,saltRounds, async (err,hash) => {
+    if(err){
+      console.log(err);
+      res.send("Error hashing the new Password");
+    }
+    else{
+      const result = await db.query("update users set password = $1 where email = $2",[hash,emailToUpdatePassword]);
+      res.render('updatedNewPassword.ejs');
+    }
+  })
+});
+
+>>>>>>> origin/main
 app.get('/add', (req, res) => {
   try {
     res.status(200).render('addReview.ejs');
