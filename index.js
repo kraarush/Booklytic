@@ -116,7 +116,6 @@ app.post("/register", async (req, res) => {
           const result = await db.query(
             "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
             [email, hash]);
-            console.log(result.rows); 
           res.redirect('/login');
         }
       });
@@ -203,6 +202,7 @@ app.post('/set-new-password', async(req,res) => {
     }
     else{
       const result = await db.query("update users set password = $1 where email = $2",[hash,emailToUpdatePassword]);
+      emailToUpdatePassword = '';
       res.render('updatedNewPassword.ejs');
     }
   })
