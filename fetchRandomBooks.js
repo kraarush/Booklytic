@@ -1,8 +1,9 @@
-import axios from "axios";
+import env from 'dotenv';
+
 
 const fetchRandomBooks = async () => {
     const api_url = "https://www.googleapis.com/books/v1/volumes";
-    const API_KEY = 'AIzaSyB84MLya_o_GNSq4JQgrPE8q77uHl_4g_U';
+    const API_KEY = process.env.GOOGLE_BOOK_API_KEY;
     const query = 'fiction';
     const maxResults = 30;
     const startIndex = Math.floor(Math.random() * 100); 
