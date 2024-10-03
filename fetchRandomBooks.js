@@ -1,15 +1,15 @@
 import env from 'dotenv';
-
+env.config();
 
 const fetchRandomBooks = async () => {
     const api_url = "https://www.googleapis.com/books/v1/volumes";
     const API_KEY = process.env.GOOGLE_BOOK_API_KEY;
     const query = 'fiction';
-    const maxResults = 30;
+    const maxResults = 20;
     const startIndex = Math.floor(Math.random() * 100); 
 
     const url = `${api_url}?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}&key=${API_KEY}`;
-
+    console.log(url);
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -33,7 +33,5 @@ const fetchRandomBooks = async () => {
         console.error('Error fetching data:', error);
     }
 };
-
-
 
 export default fetchRandomBooks;

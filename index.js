@@ -1,10 +1,15 @@
 import express from 'express';
 import pg from 'pg';
-import axios from 'axios';
 import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
 import bcrypt from 'bcrypt';
+import env from 'dotenv';
+import passport from 'passport';
+import { Strategy } from 'passport-local';
+import GoogleStrategy from 'passport-google-oauth2';
+import session from 'express-session';
 
+env.config();
 const app = express();
 const port = 3000;
 const saltRounds = 10;
@@ -16,11 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 const db = new pg.Client({
-  user: "postgres",
-  host: "localhost",
-  database: "Bookstore_Capstone_Project",
-  password: "aarush",
-  port: 5432,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 });
 db.connect();
 
@@ -79,6 +84,19 @@ app.get("/register", (req, res) => {
   res.render("register.ejs");
 });
 
+app.get('/forgotPassword',(req,res) => {
+  res.render('forgotPassword.ejs');
+});
+
+app.get('/add', (req, res) => {
+  try {
+    res.status(200).render('addReview.ejs');
+  }
+  catch (err) {
+    res.status(500).send("Internal Server error fetching the addReview.ejs file");
+  }
+});
+
 app.get('/signOut', (req,res) => {
   try{
     isLoggedIn = false;
@@ -90,8 +108,45 @@ app.get('/signOut', (req,res) => {
   }
 });
 
-app.get('/forgotPassword',(req,res) => {
-  res.render('forgotPassword.ejs');
+app.get('/dashboard', async (req, res) => {
+  try {
+    let data = await getData();
+
+    if(data.length === 0){
+      let apiData = await fetchRandomBooks();
+      data = await insertIfEmpty(apiData);
+    }
+    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false, isLoggedIn: isLoggedIn});
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server error fetching the index.ejs file");
+  }
+});
+
+app.get('/delete/:id', async(req,res) => {
+  try {
+    const id = parseInt(req.params.id);
+    console.log(id);
+
+    await db.query("DELETE FROM books WHERE id = $1", [id]);
+
+    res.status(200).redirect('/');
+  }
+  catch(err){
+    res.status(500).send("Error deleting the data");    
+  }
+});
+
+app.get('/edit/:id', async(req,res) => {
+  try {
+    const id = parseInt(req.params.id);
+    let data = await getDataById(id);
+    res.status(200).render('editReview.ejs',{bookData: data});
+  }
+  catch (err) {
+    res.status(500).send("Internal Server error fetching the editReview.ejs file");
+  }
 });
 
 app.post("/register", async (req, res) => {
@@ -163,23 +218,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get('/dashboard', async (req, res) => {
-  try {
-    let data = await getData();
-
-    if(data.length === 0){
-      let apiData = await fetchRandomBooks();
-      data = await insertIfEmpty(apiData);
-    }
-    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true:false, isLoggedIn: isLoggedIn});
-  }
-  catch (err) {
-    console.log(err);
-    res.status(500).send("Internal Server error fetching the index.ejs file");
-  }
-});
-
-
 app.post('/reset-password',async (req,res) => {
   const { email } = req.body;
   const result = await db.query("select * from users where email = $1",[email]);
@@ -208,25 +246,6 @@ app.post('/set-new-password', async(req,res) => {
   })
 });
 
-app.get('/add', (req, res) => {
-  try {
-    res.status(200).render('addReview.ejs');
-  }
-  catch (err) {
-    res.status(500).send("Internal Server error fetching the addReview.ejs file");
-  }
-});
-
-app.get('/edit/:id', async(req,res) => {
-  try {
-    const id = parseInt(req.params.id);
-    let data = await getDataById(id);
-    res.status(200).render('editReview.ejs',{bookData: data});
-  }
-  catch (err) {
-    res.status(500).send("Internal Server error fetching the editReview.ejs file");
-  }
-});
 
 app.post('/addReview', async (req, res) => {
   try {
@@ -267,20 +286,6 @@ app.post('/editReview/:id', async (req, res) => {
     res.status(500).json({ type: 'Internal server error', message: 'Error updating database' });
   }
 });
-
-app.get('/delete/:id', async(req,res) => {
-  try {
-    const id = parseInt(req.params.id);
-    console.log(id);
-
-    await db.query("DELETE FROM books WHERE id = $1", [id]);
-
-    res.status(200).redirect('/');
-  }
-  catch(err){
-    res.status(500).send("Error deleting the data");    
-  }
-})
 
 app.listen(port, () => {
   console.log(`Server is running on: http://localhost:${port}`);
