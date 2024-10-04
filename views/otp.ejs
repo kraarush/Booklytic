@@ -1,0 +1,38 @@
+<%- include('partials/header-auth') %>
+
+<div class="d-flex justify-content-center align-items-center bg-light">
+    <div class="card shadow" style="width: 500px;">
+        <div class="card-body text-center">
+            <h2 class="card-title mb-4">OTP Verification</h2>           
+            <hr>
+                
+                <% if(locals.isSent == true) {%>
+                    <p class="card-text mb-4">Enter the OTP sent to your email.</p>
+                    <form action="/verify_otp" method="POST">
+                        <% if(locals.inCorrectOtp) {%>
+                            <p class="text-danger">Incorrect OTP</p>
+                        <% } %>
+                        
+                        <input type="text" name="otp" class="form-control mb-3" placeholder="Enter OTP" required>
+                        <div class="container">
+                            <% if(locals.isResent) {%>
+                                <p class="text-success fs-4">Otp resent successfully</p>
+                            <% } %>
+                            <p>Didn't Receive otp? <a href="/verify_otp" class="link-primary text-decoration-none">Resend Otp</a></p>
+                            <button type="submit" class="btn btn-dark w-50">Verify</button>
+                        </div>
+                    <% } else { %>
+                        <p>Click on sent otp to proceed</p>
+                        <% if(locals.failedToSentOtp) {%>
+                            <p class="text-danger">Failed to send OTP</p>
+                        <% } %>
+                        <button class="btn btn-dark"><a href="/verify_otp" class="text-white text-decoration-none">Send Otp</a></button>
+                    <% } %>
+                </form>
+
+        </div>
+    </div>
+</div>
+
+
+<%- include('partials/footer') %>
