@@ -149,6 +149,11 @@ app.get('/verify_otp', (req, res) => {
   try {
     count += 1;
     otp = Math.floor(100000 + Math.random() * 900000);
+
+    setTimeout(()=>{
+      otp = -1;
+    },600000);    // otp will expire after 10 min
+
     const emailBody = `
     <p>Dear User,</p>
     <p>We received a request to reset the password for your account. To proceed with resetting your password, please use the following One-Time Password (OTP):</p>
@@ -274,12 +279,17 @@ app.post('/reset-password', async (req, res) => {
 });
 
 app.post('/verify_otp', (req, res) => {
-  const userOtp = req.body.otp
-  if (otp == userOtp) {
+  const userOtp = req.body.otp;
+
+  if(otp == -1){
+    res.render('otp.ejs', { isSent: true, inCorrectOtp: "OTP expired try again" });
+  }
+  else if (otp == userOtp) {
     res.render('forgotPassword.ejs', { isExist: true });
   }
-  else {
-    res.render('otp.ejs', { isSent: true, inCorrectOtp: true });
+  else{
+    res.render('otp.ejs', { isSent: true, inCorrectOtp: "Incorrect OTP" });
+
   }
 });
 
@@ -297,7 +307,6 @@ app.post('/set-new-password', async (req, res) => {
     }
   })
 });
-
 
 app.post('/addReview', async (req, res) => {
   try {

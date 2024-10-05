@@ -10,7 +10,7 @@
                     <p class="card-text mb-4">Enter the OTP sent to your email.</p>
                     <form action="/verify_otp" method="POST">
                         <% if(locals.inCorrectOtp) {%>
-                            <p class="text-danger">Incorrect OTP</p>
+                            <p class="text-danger"><%= inCorrectOtp %></p>
                         <% } %>
                         
                         <input type="text" name="otp" class="form-control mb-3" placeholder="Enter OTP" required>
