@@ -149,33 +149,41 @@ app.get('/verify_otp', (req, res) => {
   try {
     count += 1;
     otp = Math.floor(100000 + Math.random() * 900000);
-    console.log("Otp generated is: " + otp + " on email: " + emailToUpdatePassword);
+    const emailBody = `
+    <p>Dear User,</p>
+    <p>We received a request to reset the password for your account. To proceed with resetting your password, please use the following One-Time Password (OTP):</p>
+    <p><strong>${otp}</strong></p>
+    <p>This OTP is valid for the next 10 minutes. Please do not share this code with anyone.</p>
+    <p>If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
+    <p>Best regards,<br>
+    Booklytic`;
+
 
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'kraarush709@gmail.com', 
-        pass: process.env.GOOGLE_SECURE_PASS, 
+        user: 'kraarush709@gmail.com',
+        pass: process.env.GOOGLE_SECURE_PASS,
       },
     });
-    
+
     let mailOptions = {
-      from: 'kraarush709@gmail.com', 
-      to: emailToUpdatePassword, 
-      subject: 'OTP Email Verification', 
-      html: `Your OTP for password reset is ${otp}`, 
+      from: 'kraarush709@gmail.com',
+      to: emailToUpdatePassword,
+      subject: 'Password Reset OTP',
+      html: emailBody,
     };
-    
+
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         res.render('otp.ejs', { isSent: false, failedToSentOtp: true });
       }
-      else{
+      else {
         res.render('otp.ejs', { isSent: true, isResent: count > 1 });
       }
     });
 
-    
+
   } catch (err) {
     console.error("Error in verify_otp route: " + err);
     res.status(500).send("Error sending otp");
