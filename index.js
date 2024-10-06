@@ -14,10 +14,19 @@ env.config();
 const app = express();
 const port = 3000;
 const saltRounds = 10;
-let isLoggedIn = false;
 let otp = -1;
 let count = 0;
 let emailToUpdatePassword = '';
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -68,6 +77,15 @@ async function insertIfEmpty(apiData) {
   }
 }
 
+function generateOTP() {
+  count += 1;
+  otp = Math.floor(100000 + Math.random() * 900000);
+
+  setTimeout(() => {
+    otp = -1;
+  }, 600000);
+}
+
 app.get("/", (req, res) => {
   res.render("home.ejs");
 });
@@ -94,31 +112,38 @@ app.get('/add', (req, res) => {
 });
 
 app.get('/signOut', (req, res) => {
-  try {
-    isLoggedIn = false;
-    res.redirect('/login');
-  }
-  catch (err) {
-    console.log("Error in signOut" + err);
-    res.send("Error signing out " + err);
-  }
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/login");
+  });
 });
 
 app.get('/dashboard', async (req, res) => {
   try {
-    let data = await getData();
+    if (req.isAuthenticated()) {
+      let data = await getData();
 
-    if (data.length === 0) {
-      let apiData = await fetchRandomBooks();
-      data = await insertIfEmpty(apiData);
+      if (data.length === 0) {
+        let apiData = await fetchRandomBooks();
+        data = await insertIfEmpty(apiData);
+      }
+      res.render("index.ejs", { bookData: data, isEmpty: data.length === 0 });
     }
-    res.render("index.ejs", { bookData: data, isEmpty: data.length == 0 ? true : false, isLoggedIn: isLoggedIn });
+    else{
+      res.redirect('/login');
+    }
   }
   catch (err) {
     console.log(err);
     res.status(500).send("Internal Server error fetching the index.ejs file");
   }
 });
+
+app.get('/auth/google', passport.authenticate('google', {
+  scope: ['profile', 'email'],
+}))
 
 app.get('/delete/:id', async (req, res) => {
   try {
@@ -147,12 +172,8 @@ app.get('/edit/:id', async (req, res) => {
 
 app.get('/verify_otp', (req, res) => {
   try {
-    count += 1;
-    otp = Math.floor(100000 + Math.random() * 900000);
 
-    setTimeout(()=>{
-      otp = -1;
-    },600000);    // otp will expire after 10 min
+    generateOTP();
 
     const emailBody = `
     <p>Dear User,</p>
@@ -161,7 +182,8 @@ app.get('/verify_otp', (req, res) => {
     <p>This OTP is valid for the next 10 minutes. Please do not share this code with anyone.</p>
     <p>If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
     <p>Best regards,<br>
-    Booklytic`;
+    Booklytic`
+      ;
 
 
     let transporter = nodemailer.createTransport({
@@ -195,6 +217,12 @@ app.get('/verify_otp', (req, res) => {
   }
 });
 
+app.get('/auth/google/booklytic', passport.authenticate('google', {
+  successRedirect: '/dashboard',
+  failureRedirect: '/login',
+})
+);
+
 app.post("/register", async (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
@@ -217,7 +245,9 @@ app.post("/register", async (req, res) => {
           const result = await db.query(
             "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
             [email, hash]);
-          res.redirect('/login');
+            req.login(user, (err) => {
+              res.redirect("/dashboard");
+            });
         }
       });
     }
@@ -228,40 +258,21 @@ app.post("/register", async (req, res) => {
 
 });
 
-app.post("/login", async (req, res) => {
-  const email = req.body.username;
-  const password = req.body.password;
-
-  try {
-    const result = await db.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
-      const storedHashedPassword = user.password;
-
-      bcrypt.compare(password, storedHashedPassword, (err, result) => {
-        if (err) {
-          console.log(err);
-          res.send('Error comparing the password' + err);
-        }
-        else {
-          if (result) {
-            isLoggedIn = true;
-            res.redirect('/dashboard');
-          }
-          else {
-            res.status(404).render('login.ejs', { isPasswordCorrect: false });
-          }
-        }
-      });
-
-    } else {
-      res.send("User not found");
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
     }
-  } catch (err) {
-    console.log(err);
-  }
+    if (!user) {
+      res.status(404).render('login.ejs', { isPasswordCorrect: false });
+    }
+    req.login(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect("/dashboard");
+    });
+  })(req, res, next);
 });
 
 app.post('/reset-password', async (req, res) => {
@@ -281,13 +292,13 @@ app.post('/reset-password', async (req, res) => {
 app.post('/verify_otp', (req, res) => {
   const userOtp = req.body.otp;
 
-  if(otp == -1){
+  if (otp == -1) {
     res.render('otp.ejs', { isSent: true, inCorrectOtp: "OTP expired try again" });
   }
   else if (otp == userOtp) {
     res.render('forgotPassword.ejs', { isExist: true });
   }
-  else{
+  else {
     res.render('otp.ejs', { isSent: true, inCorrectOtp: "Incorrect OTP" });
 
   }
@@ -347,6 +358,72 @@ app.post('/editReview/:id', async (req, res) => {
     res.status(500).json({ type: 'Internal server error', message: 'Error updating database' });
   }
 });
+
+passport.use('local',
+  new Strategy(async function verify(username, password, cb) {
+    try {
+      const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
+        username,
+      ]);
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        const storedHashedPassword = user.password;
+        bcrypt.compare(password, storedHashedPassword, (err, valid) => {
+          if (err) {
+            console.error("Error comparing passwords:", err);
+            return cb(err);
+          } else {
+            if (valid) {
+              return cb(null, user);
+            } else {
+              return cb(null, false);
+            }
+          }
+        });
+      } else {
+        return cb("User not found");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/auth/google/booklytic",
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+},
+  async (accessToken, refreshToken, profile, cb) => {
+    try {
+      const result = await db.query("select * from users where email = $1", [profile.email]);
+
+      if (result.rows.length == 0) {
+        const result = await db.query(
+          "INSERT INTO users (email, password) VALUES ($1,$2) RETURNING *",
+          [profile.email, 'google']
+        );
+        const user = result.rows[0];
+        cb(null, user);
+      }
+      else {
+        cb(null, result.rows[0]);
+      }
+    }
+    catch (err) {
+      console.log("Error in google strategy " + err);
+    }
+  }
+));
+
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
+passport.deserializeUser((user, cb) => {
+  cb(null, user);
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on: http://localhost:${port}`);
