@@ -15,7 +15,7 @@
 
   <body class="bg-body-secondary">
     <main>
-      <nav class="navbar navbar-expand-lg bg-dark mb-3">
+      <!-- <nav class="navbar navbar-expand-lg bg-dark mb-3">
         <div class="container-fluid d-flex align-items-center">
           <img src="/Images/logo.webp" alt="Logo" style="height: 70px" />
           <a
@@ -29,8 +29,25 @@
 
         <a class="navbar-brand text-warning " href="/signOut">Sign Out</a>
 
+      </nav> -->
+
+      <nav class="navbar navbar-expand-lg bg-dark mb-3">
+        <div class="container-fluid d-flex align-items-center">
+          <img src="/Images/logo.webp" alt="Logo" style="height: 70px" />
+          <a class="navbar-brand text-warning fs-2 ms-3" href="/">Booklytic</a>
+      
+          <!-- Centered Search Bar -->
+          <form class="d-flex mx-auto" style="width: 40%;" action="/searchedBooks" method="post">
+            <input class="form-control me-2" name = "searchedInput" type="search" placeholder="Search Book By title" aria-label="Search">
+            <button class="btn btn-outline-warning" type="submit">Search</button>
+          </form>
+      
+          <a class="navbar-brand text-warning" href="/add">Add Review</a>
+          <a class="navbar-brand text-warning" href="/signOut">Sign Out</a>
+        </div>
       </nav>
 
+      
       <% if(locals.isEmpty){ %>
       <div class="container text-center mb-4 text-primary">
         <h2>Sorry dont have any book reviews yet</h2>

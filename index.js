@@ -23,6 +23,9 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      maxAge: 6000 * 60 * 24 * 30,
+    }
   })
 );
 app.use(passport.initialize());
@@ -359,6 +362,21 @@ app.post('/editReview/:id', async (req, res) => {
   }
 });
 
+app.post('/searchedBooks', async (req,res) => {
+  const title = req.body.searchedInput;
+
+  if(!title){
+    res.render('index.ejs');
+  }
+  else{
+    console.log(title);
+    console.log(`select * from books where title like '%' || '${title}' || '%' `);
+    const result = await db.query("select * from books where title like '%' || $1 || '%'", [title]);
+    console.log(result.rows);
+    res.render('index.ejs', {bookData: result.rows});
+  }
+});
+
 passport.use('local',
   new Strategy(async function verify(username, password, cb) {
     try {
@@ -392,7 +410,7 @@ passport.use('local',
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/auth/google/booklytic",
+  callbackURL: process.env.GOOGLE_CLIENT_CALLBACKURL,
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
 },
   async (accessToken, refreshToken, profile, cb) => {
