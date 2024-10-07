@@ -25,7 +25,11 @@ const fetchRandomBooks = async () => {
                 previewLink: item.volumeInfo.previewLink || 'No preview available',
                 bookLink: item.volumeInfo.infoLink || 'No info available',
             };
-            book.title = book.title.charAt(0).toUpperCase() + book.title.slice(1).toLowerCase();
+            
+            if (book.title.charAt(0).match(/[a-zA-Z]/)) {
+                book.title = book.title.charAt(0).toUpperCase() + book.title.slice(1).toLowerCase();
+            }
+
             bookData.push(book);
         }); 
 

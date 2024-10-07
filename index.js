@@ -93,6 +93,13 @@ app.get('/home', (req,res) => {
   res.render('home.ejs');
 });
 
+app.get('/addmorebooks', async(req,res) => {
+  const apiData = await fetchRandomBooks();
+  await insertIfEmpty(apiData);
+  console.log("successful");
+  res.send("done inserting data");
+});
+
 app.get('/', async (req, res) => {
   try {
     if (req.isAuthenticated()) {
@@ -363,14 +370,16 @@ app.post('/editReview/:id', async (req, res) => {
 });
 
 app.post('/searchedBooks', async (req,res) => {
-  const title = req.body.searchedInput;
+  let title = req.body.searchedInput;
 
   if(!title){
     res.render('index.ejs');
   }
   else{
+    if (title.charAt(0).match(/[a-zA-Z]/)) {
+      title = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
+    }  
     console.log(title);
-    console.log(`select * from books where title like '%' || '${title}' || '%' `);
     const result = await db.query("select * from books where title like '%' || $1 || '%'", [title]);
     console.log(result.rows);
     res.render('index.ejs', {bookData: result.rows});
