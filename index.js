@@ -86,8 +86,29 @@ function generateOTP() {
   }, 600000);
 }
 
-app.get("/", (req, res) => {
-  res.render("home.ejs");
+app.get('/home', (req,res) => {
+  res.render('home.ejs');
+});
+
+app.get('/', async (req, res) => {
+  try {
+    if (req.isAuthenticated()) {
+      let data = await getData();
+
+      if (data.length === 0) {
+        let apiData = await fetchRandomBooks();
+        data = await insertIfEmpty(apiData);
+      }
+      res.render("index.ejs", { bookData: data, isEmpty: data.length === 0 });
+    }
+    else{
+      res.redirect('/home');
+    }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server error fetching the index.ejs file");
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -118,27 +139,6 @@ app.get('/signOut', (req, res) => {
     }
     res.redirect("/login");
   });
-});
-
-app.get('/dashboard', async (req, res) => {
-  try {
-    if (req.isAuthenticated()) {
-      let data = await getData();
-
-      if (data.length === 0) {
-        let apiData = await fetchRandomBooks();
-        data = await insertIfEmpty(apiData);
-      }
-      res.render("index.ejs", { bookData: data, isEmpty: data.length === 0 });
-    }
-    else{
-      res.redirect('/login');
-    }
-  }
-  catch (err) {
-    console.log(err);
-    res.status(500).send("Internal Server error fetching the index.ejs file");
-  }
 });
 
 app.get('/auth/google', passport.authenticate('google', {
@@ -218,7 +218,7 @@ app.get('/verify_otp', (req, res) => {
 });
 
 app.get('/auth/google/booklytic', passport.authenticate('google', {
-  successRedirect: '/dashboard',
+  successRedirect: '/',
   failureRedirect: '/login',
 })
 );
@@ -246,7 +246,7 @@ app.post("/register", async (req, res) => {
             "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
             [email, hash]);
             req.login(user, (err) => {
-              res.redirect("/dashboard");
+              res.redirect("/");
             });
         }
       });
@@ -270,7 +270,7 @@ app.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.redirect("/dashboard");
+      res.redirect("/");
     });
   })(req, res, next);
 });
