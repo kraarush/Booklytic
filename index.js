@@ -93,12 +93,12 @@ app.get('/home', (req,res) => {
   res.render('home.ejs');
 });
 
-app.get('/addmorebooks', async(req,res) => {
-  const apiData = await fetchRandomBooks();
-  await insertIfEmpty(apiData);
-  console.log("successful");
-  res.send("done inserting data");
-});
+// app.get('/addmorebooks', async(req,res) => {
+//   const apiData = await fetchRandomBooks();
+//   await insertIfEmpty(apiData);
+//   console.log("successful");
+//   res.send("done inserting data");
+// });
 
 app.get('/', async (req, res) => {
   try {
