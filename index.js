@@ -75,7 +75,7 @@ async function insertIfEmpty(apiData) {
     return data;
   }
   catch (err) {
-    console.log("Error in insertIfEmpty" + err);
+    console.log("Error in insertIfEmpty: " + err);
     res.send("here here")
   }
 }
