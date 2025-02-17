@@ -33,7 +33,7 @@ Booklytic is a full-stack web application built for book enthusiasts, enabling u
 ## ⚙️ Installation & Setup
 1. **Clone the repository:**
    ```sh
-   git clone [repository URL]
+   git clone https://github.com/kraarush/Booklytic
    cd booklytic
    ```
 2. **Install dependencies:**
