@@ -12,8 +12,8 @@ import session from 'express-session';
 
 env.config();
 const { Client } = pkg;
+const PORT = process.env.PORT || 3000;
 const app = express();
-const port = 3000;
 const saltRounds = 10;
 let otp = -1;
 let count = 0;
@@ -35,15 +35,6 @@ app.use(passport.session());
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
-
-// const db = new pg.Client({
-//   user: process.env.PG_USER,
-//   host: process.env.PG_HOST,
-//   database: process.env.PG_DATABASE,
-//   password: process.env.PG_PASSWORD,
-//   port: process.env.PG_PORT,
-// });
-// db.connect();
 
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -460,7 +451,7 @@ passport.deserializeUser((user, cb) => {
 });
 
 
-app.listen(port, async() => {
+app.listen(PORT, async() => {
   await db.connect();
-  console.log(`Server is running on: http://localhost:${port}`);
+  console.log(`Server is running on: http://localhost:${PORT}`);
 });                                                       
