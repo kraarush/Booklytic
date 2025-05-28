@@ -67,11 +67,16 @@ async function getDataById(id) {
 
 async function insertIfEmpty(apiData) {
   try {
-    apiData.forEach(async data => {
+    // apiData.forEach(async data => {
+    //   await db.query("insert into books(title,author,rating,content,image,previewlink,booklink) values($1,$2,$3,$4,$5,$6,$7)", [data.title, data.author, data.rating, data.content, data.image, data.previewLink, data.bookLink]);
+    // });
+    // let data = await getData();
+    // return data;
+
+    for (const data of apiData) {
       await db.query("insert into books(title,author,rating,content,image,previewlink,booklink) values($1,$2,$3,$4,$5,$6,$7)", [data.title, data.author, data.rating, data.content, data.image, data.previewLink, data.bookLink]);
-    });
-    let data = await getData();
-    return data;
+    }
+    return await getData();
   }
   catch (err) {
     console.log("Error in insertIfEmpty: " + err);
@@ -410,7 +415,7 @@ passport.use('local',
         return cb("User not found");
       }
     } catch (err) {
-      console.log(err);
+      console.log(err); 
     }
   })
 ); 
