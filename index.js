@@ -1,5 +1,5 @@
 import express from 'express';
-import pg from 'pg';
+import pkg from 'pg';
 import bodyParser from 'body-parser';
 import fetchRandomBooks from './fetchRandomBooks.js';
 import bcrypt from 'bcrypt';
@@ -11,6 +11,7 @@ import GoogleStrategy from 'passport-google-oauth2';
 import session from 'express-session';
 
 env.config();
+const { Client } = pkg;
 const app = express();
 const port = 3000;
 const saltRounds = 10;
@@ -35,14 +36,21 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const db = new pg.Client({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
+// const db = new pg.Client({
+//   user: process.env.PG_USER,
+//   host: process.env.PG_HOST,
+//   database: process.env.PG_DATABASE,
+//   password: process.env.PG_PASSWORD,
+//   port: process.env.PG_PORT,
+// });
+// db.connect();
+
+const db = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
-db.connect();
 
 async function getData() {
   try {
@@ -93,12 +101,12 @@ app.get('/home', (req,res) => {
   res.render('home.ejs');
 });
 
-// app.get('/addmorebooks', async(req,res) => {
-//   const apiData = await fetchRandomBooks();
-//   await insertIfEmpty(apiData);
-//   console.log("successful");
-//   res.send("done inserting data");
-// });
+app.get('/addmorebooks', async(req,res) => {
+  const apiData = await fetchRandomBooks();
+  await insertIfEmpty(apiData);
+  console.log("successful");
+  res.send("done inserting data");
+});
 
 app.get('/', async (req, res) => {
   try {
@@ -193,7 +201,7 @@ app.get('/verify_otp', (req, res) => {
     <p>If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
     <p>Best regards,<br>
     Booklytic`
-      ;
+    ;
 
 
     let transporter = nodemailer.createTransport({
@@ -219,7 +227,6 @@ app.get('/verify_otp', (req, res) => {
         res.render('otp.ejs', { isSent: true, isResent: count > 1 });
       }
     });
-
 
   } catch (err) {
     console.error("Error in verify_otp route: " + err);
@@ -255,6 +262,7 @@ app.post("/register", async (req, res) => {
           const result = await db.query(
             "INSERT INTO users (email, password) VALUES ($1, $2) returning *",
             [email, hash]);
+            const user = result.rows[0]; 
             req.login(user, (err) => {
               res.redirect("/");
             });
@@ -414,7 +422,7 @@ passport.use('local',
       console.log(err);
     }
   })
-);
+); 
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -452,6 +460,7 @@ passport.deserializeUser((user, cb) => {
 });
 
 
-app.listen(port, () => {
+app.listen(port, async() => {
+  await db.connect();
   console.log(`Server is running on: http://localhost:${port}`);
 });                                                       
